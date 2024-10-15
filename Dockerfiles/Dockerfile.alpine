@@ -1,0 +1,25 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG CONFIGURATION
+ENV WORKDIR /src
+WORKDIR ${WORKDIR}
+ENV DOTNET_ROLL_FORWARD LatestMajor
+
+COPY ./csharp/ .
+RUN ls
+RUN dotnet restore
+RUN dotnet build -o /app/build
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine3.20-amd64
+
+# 依存パッケージ追加
+RUN apk add --no-cache icu-data-full=74.2-r0 icu-libs=74.2-r0 tzdata=2024b-r0 curl=8.10.1-r0
+
+ENV HOME /root
+
+# グローバリゼーション不変モード解除
+# https://learn.microsoft.com/ja-jp/dotnet/core/runtime-config/globalization
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
+WORKDIR /home/app
+COPY --from=build /app/build/ /home/app/
+ENTRYPOINT [ "dotnet", "test_icu.dll" ]

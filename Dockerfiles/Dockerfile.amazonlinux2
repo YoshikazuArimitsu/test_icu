@@ -1,0 +1,22 @@
+# docker build -t app_al2 -f ./Dockerfiles/Dockerfile.amazonlinux2 . && docker run -it app_al2
+
+FROM amazonlinux:2
+
+# yum update & install
+RUN yum update -y && yum install unzip zip tar gzip wget libicu -y
+RUN yum update -y && yum install -y tzdata
+
+# .NET ランタイム直インストール
+ENV HOME /root
+WORKDIR /root
+RUN wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh && chmod +x dotnet-install.sh
+RUN ./dotnet-install.sh --channel 8.0
+RUN export DOTNET_ROOT=$HOME/.dotnet
+RUN export PATH=$PATH:$HOME/.dotnet
+
+COPY ./csharp/ /root/csharp/
+
+ENV DOTNET_ROOT $HOME/.dotnet
+ENV PATH $PATH:$HOME/.dotnet
+WORKDIR /root/csharp
+ENTRYPOINT [ "dotnet", "run" ]
