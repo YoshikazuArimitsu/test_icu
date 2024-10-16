@@ -5,7 +5,6 @@ WORKDIR ${WORKDIR}
 ENV DOTNET_ROLL_FORWARD LatestMajor
 
 COPY ./csharp/ .
-RUN ls
 RUN dotnet restore
 RUN dotnet build -o /app/build
 
@@ -22,4 +21,4 @@ ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 WORKDIR /home/app
 COPY --from=build /app/build/ /home/app/
-ENTRYPOINT [ "dotnet", "test_icu.dll" ]
+# ENTRYPOINT [ "dotnet", "test_icu.dll" ]
